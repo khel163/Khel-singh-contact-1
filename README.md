@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<title>Rishtedar Manager</title>
+<title>Rishtedar Manager Final</title>
 
 <!-- Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -24,33 +24,30 @@ button { background:green; color:white; border:none; }
   border-radius:10px;
 }
 
-img { width:80px; height:80px; border-radius:50%; }
+img {
+  width:80px; height:80px; border-radius:50%;
+}
 
-.action-btn {
-  background:blue; margin-top:5px;
-}
-.delete-btn {
-  background:red;
-}
+.edit { background:blue; }
+.delete { background:red; }
 </style>
 </head>
 
 <body>
 
-<h2>👨‍👩‍👧 रिश्तेदार जोड़ें</h2>
+<h2>👨‍👩‍👧 रिश्तेदार मैनेजर</h2>
 
-<input type="text" id="name" placeholder="नाम">
-<input type="text" id="village" placeholder="गांव">
-<input type="text" id="relation" placeholder="रिश्ता">
-<input type="text" id="map" placeholder="Google Map Link">
+<input id="name" placeholder="नाम">
+<input id="village" placeholder="गांव">
+<input id="relation" placeholder="रिश्ता">
+<input id="map" placeholder="Google Map Link">
 <input type="file" id="photo">
 
 <button onclick="saveData()">Save</button>
 
 <hr>
 
-<h3>🔍 Search</h3>
-<input type="text" id="search" onkeyup="searchData()" placeholder="नाम या गांव">
+<input id="search" placeholder="Search (नाम / गांव)" onkeyup="searchData()">
 
 <button onclick="showData()">Reset</button>
 <button onclick="exportExcel()">Excel</button>
@@ -69,18 +66,19 @@ function getBase64(file, callback) {
   reader.readAsDataURL(file);
 }
 
-// SAVE / UPDATE
+// SAVE
 function saveData() {
-  let name = nameEl.value;
-  let village = villageEl.value;
-  let relation = relationEl.value;
-  let map = mapEl.value;
-  let file = photoEl.files[0];
+  let name = nameEl.value.trim();
+  let village = villageEl.value.trim();
 
   if (!name || !village) {
     alert("नाम और गांव जरूरी है");
     return;
   }
+
+  let relation = relationEl.value;
+  let map = mapEl.value;
+  let file = photoEl.files[0];
 
   if (file) {
     getBase64(file, (base64) => processSave(base64));
@@ -110,7 +108,7 @@ function processSave(photo) {
   showData();
 }
 
-// FORM CLEAR
+// CLEAR
 function clearForm() {
   nameEl.value = "";
   villageEl.value = "";
@@ -120,29 +118,34 @@ function clearForm() {
 }
 
 // DELETE
-function deleteData(index) {
+function deleteData(i) {
   if (confirm("Delete करना है?")) {
-    people.splice(index, 1);
+    people.splice(i, 1);
     localStorage.setItem("people", JSON.stringify(people));
     showData();
   }
 }
 
 // EDIT
-function editData(index) {
-  let p = people[index];
+function editData(i) {
+  let p = people[i];
 
   nameEl.value = p.name;
   villageEl.value = p.village;
   relationEl.value = p.relation;
   mapEl.value = p.map;
 
-  editIndex = index;
+  editIndex = i;
 }
 
-// SHOW
+// SHOW (group by village)
 function showData(data = people) {
   list.innerHTML = "";
+
+  if (data.length === 0) {
+    list.innerHTML = "<p>कोई डेटा नहीं है</p>";
+    return;
+  }
 
   let grouped = {};
 
@@ -162,8 +165,8 @@ function showData(data = people) {
         रिश्ता: ${p.relation}<br>
         <a href="${p.map}" target="_blank">📍 Map</a><br>
 
-        <button class="action-btn" onclick="editData(${p.index})">Edit</button>
-        <button class="delete-btn" onclick="deleteData(${p.index})">Delete</button>
+        <button class="edit" onclick="editData(${p.index})">Edit</button>
+        <button class="delete" onclick="deleteData(${p.index})">Delete</button>
       </div>
       `;
     });
@@ -182,31 +185,51 @@ function searchData() {
   showData(filtered);
 }
 
-// EXCEL
+// EXCEL (fixed)
 function exportExcel() {
-  let ws = XLSX.utils.json_to_sheet(people);
+  if (typeof XLSX === "undefined") {
+    alert("Internet ON करो (Excel library load नहीं हुई)");
+    return;
+  }
+
+  if (people.length === 0) {
+    alert("कोई डेटा नहीं है");
+    return;
+  }
+
+  let data = people.map(p => ({
+    Name: p.name,
+    Village: p.village,
+    Relation: p.relation,
+    Map: p.map
+  }));
+
+  let ws = XLSX.utils.json_to_sheet(data);
   let wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Data");
-  XLSX.writeFile(wb, "data.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, "Rishtedar");
+
+  XLSX.writeFile(wb, "Rishtedar_Data.xlsx");
 }
 
-// PDF
+// PDF (better)
 function exportPDF() {
   const { jsPDF } = window.jspdf;
   let doc = new jsPDF();
 
+  doc.text("Rishtedar List", 10, 10);
+
   people.forEach((p, i) => {
     doc.text(
-      `${p.name} | ${p.village} | ${p.relation}`,
+      `${i+1}. ${p.name} | ${p.village} | ${p.relation}`,
       10,
-      10 + i * 10
+      20 + i * 10
     );
   });
 
-  doc.save("data.pdf");
+  doc.save("Rishtedar.pdf");
 }
 
-// shortcuts
+// shortcut
 let nameEl = document.getElementById("name");
 let villageEl = document.getElementById("village");
 let relationEl = document.getElementById("relation");

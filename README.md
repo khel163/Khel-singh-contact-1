@@ -1,15 +1,20 @@
-
+<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚀 एडवांस रिश्तेदार मैनेजर</title>
+<title>🚀 खेल परिवार - रिश्तेदार मैनेजर</title>
 
 <!-- Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/party-js@latest/bundle/party.min.js"></script>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -61,10 +66,26 @@ body {
   border-radius: 10px;
   text-align: center;
   min-width: 100px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 .stat-card i { font-size: 24px; margin-bottom: 5px; }
 .stat-card span { display: block; font-size: 20px; font-weight: bold; }
+
+/* Sync Status */
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f0f0f0;
+  padding: 8px 15px;
+  border-radius: 50px;
+  font-size: 14px;
+}
+
+.sync-status i.fa-sync-alt { color: #f59e0b; }
+.sync-status i.fa-check-circle { color: #10b981; }
+.sync-status i.fa-exclamation-circle { color: #ef4444; }
 
 /* Form Section */
 .form-section {
@@ -234,6 +255,12 @@ input:focus, select:focus, textarea:focus {
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #667eea;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
 }
 
 .info {
@@ -306,6 +333,11 @@ input:focus, select:focus, textarea:focus {
   border-radius: 8px;
   margin-bottom: 8px;
   border-left: 4px solid #667eea;
+  transition: transform 0.3s;
+}
+
+.upcoming-item:hover {
+  transform: translateX(5px);
 }
 
 .upcoming-item .date {
@@ -335,6 +367,57 @@ input:focus, select:focus, textarea:focus {
   display: inline-flex;
   align-items: center;
   gap: 3px;
+}
+
+/* Photo Modal */
+.photo-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.photo-modal img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.3);
+  z-index: 3000;
+  text-align: center;
+}
+
+.loading-spinner i {
+  font-size: 40px;
+  color: #667eea;
+  margin-bottom: 10px;
 }
 
 /* Responsive */
@@ -368,6 +451,16 @@ input:focus, select:focus, textarea:focus {
     width: 100%;
   }
 }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.relative-card {
+  animation: fadeIn 0.5s ease-out;
+}
 </style>
 </head>
 <body>
@@ -375,7 +468,13 @@ input:focus, select:focus, textarea:focus {
 <div class="container">
   <!-- Header -->
   <div class="header">
-    <h2><i class="fas fa-people-arrows"></i> एडवांस रिश्तेदार मैनेजर</h2>
+    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+      <h2><i class="fas fa-people-arrows"></i> खेल परिवार - रिश्तेदार मैनेजर</h2>
+      <div class="sync-status" id="syncStatus">
+        <i class="fas fa-sync-alt fa-spin"></i>
+        <span>कनेक्ट हो रहा है...</span>
+      </div>
+    </div>
     <div class="stats">
       <div class="stat-card">
         <i class="fas fa-users"></i>
@@ -494,6 +593,7 @@ input:focus, select:focus, textarea:focus {
     <div class="form-group">
       <i class="fas fa-camera"></i>
       <input type="file" id="photo" accept="image/*" style="padding: 12px;">
+      <small style="display: block; margin-top: 5px; color: #666;">अधिकतम 5MB (JPG, PNG)</small>
     </div>
 
     <div class="btn-group">
@@ -503,7 +603,7 @@ input:focus, select:focus, textarea:focus {
       <button class="btn btn-success" onclick="clearForm()">
         <i class="fas fa-undo"></i> क्लियर
       </button>
-      <button class="btn btn-info" onclick="loadData()">
+      <button class="btn btn-info" onclick="loadFromFirebase()">
         <i class="fas fa-sync-alt"></i> रिफ्रेश
       </button>
     </div>
@@ -562,10 +662,41 @@ input:focus, select:focus, textarea:focus {
   </div>
 </div>
 
+<!-- Photo Modal -->
+<div id="photoModal" class="photo-modal" onclick="closePhotoModal()">
+  <span class="close-modal">&times;</span>
+  <img id="modalImage" src="" alt="बड़ी फोटो">
+</div>
+
+<!-- Loading Spinner -->
+<div id="loadingSpinner" class="loading-spinner">
+  <i class="fas fa-circle-notch fa-spin"></i>
+  <p>कृपया प्रतीक्षा करें...</p>
+</div>
+
 <script>
+// ==================== FIREBASE CONFIGURATION (आपका दिया हुआ) ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyAIcK_AaaQSqCF_-4L9CPkBvNuD1EkQpcU",
+  authDomain: "khel-family.firebaseapp.com",
+  projectId: "khel-family",
+  storageBucket: "khel-family.firebasestorage.app",
+  messagingSenderId: "306385476526",
+  appId: "1:306385476526:web:8cf4df596a36b48f68863f",
+  measurementId: "G-FCNXL01ZKF"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const storage = firebase.storage();
+const peopleRef = database.ref('people');
+
 // ==================== GLOBAL VARIABLES ====================
 let people = [];
 let editIndex = -1;
+let currentFilteredData = null;
+let isLoading = false;
 
 // DOM Elements
 let nameEl, villageEl, relationEl, phoneEl, mapEl, birthdayEl, gotraEl, genderEl, familyHeadEl, notesEl, photoEl;
@@ -593,19 +724,80 @@ document.addEventListener('DOMContentLoaded', function() {
   filterVillage = document.getElementById("filterVillage");
   filterRelation = document.getElementById("filterRelation");
   
-  // Load data from localStorage
-  loadData();
+  // Load data from Firebase
+  loadFromFirebase();
+  
+  // Listen for real-time updates
+  peopleRef.on('value', (snapshot) => {
+    if (!isLoading) {
+      const data = snapshot.val();
+      if (data) {
+        // Convert object to array
+        people = Object.keys(data).map(key => ({
+          firebaseKey: key,
+          id: key, // Use firebase key as id
+          ...data[key]
+        }));
+      } else {
+        people = [];
+      }
+      updateUI();
+      updateSyncStatus('synced');
+    }
+  });
 });
 
-// Load data from localStorage
-function loadData() {
-  let savedData = localStorage.getItem("advancePeople");
-  if (savedData) {
-    people = JSON.parse(savedData);
-  } else {
-    people = [];
+// Show/Hide Loading Spinner
+function showLoading(show) {
+  document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+}
+
+// Update sync status
+function updateSyncStatus(status) {
+  const syncEl = document.getElementById('syncStatus');
+  if (status === 'syncing') {
+    syncEl.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> <span>सिंक हो रहा है...</span>';
+  } else if (status === 'synced') {
+    syncEl.innerHTML = '<i class="fas fa-check-circle" style="color: #10b981;"></i> <span>सिंक हो गया</span>';
+  } else if (status === 'error') {
+    syncEl.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #ef4444;"></i> <span>सिंक एरर</span>';
   }
-  editIndex = -1;
+}
+
+// Load data from Firebase
+function loadFromFirebase() {
+  isLoading = true;
+  updateSyncStatus('syncing');
+  showLoading(true);
+  
+  peopleRef.once('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      // Convert object to array
+      people = Object.keys(data).map(key => ({
+        firebaseKey: key,
+        id: key,
+        ...data[key]
+      }));
+    } else {
+      people = [];
+    }
+    
+    isLoading = false;
+    showLoading(false);
+    updateUI();
+    updateSyncStatus('synced');
+  }, (error) => {
+    console.error("Firebase load error:", error);
+    updateSyncStatus('error');
+    isLoading = false;
+    showLoading(false);
+    alert("Firebase से डेटा लोड करने में समस्या हुई! कृपया इंटरनेट चेक करें।");
+  });
+}
+
+// Update all UI components
+function updateUI() {
   updateFamilyHeadOptions();
   updateFilters();
   showData();
@@ -616,14 +808,61 @@ function loadData() {
 }
 
 // ==================== PHOTO HANDLING ====================
-function getBase64(file, callback) {
-  let reader = new FileReader();
-  reader.onload = () => callback(reader.result);
-  reader.readAsDataURL(file);
+async function uploadPhoto(file) {
+  if (!file) return "";
+  
+  // Check file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    alert("फोटो का साइज 5MB से कम होना चाहिए!");
+    return "";
+  }
+  
+  // Check file type
+  if (!file.type.startsWith('image/')) {
+    alert("कृपया केवल फोटो फाइल अपलोड करें!");
+    return "";
+  }
+  
+  showLoading(true);
+  updateSyncStatus('syncing');
+  
+  try {
+    // Create a unique filename
+    const timestamp = Date.now();
+    const fileName = `photos/${timestamp}_${file.name}`;
+    const storageRef = storage.ref(fileName);
+    
+    // Upload file
+    await storageRef.put(file);
+    
+    // Get download URL
+    const downloadURL = await storageRef.getDownloadURL();
+    
+    showLoading(false);
+    updateSyncStatus('synced');
+    return downloadURL;
+  } catch (error) {
+    console.error("Photo upload error:", error);
+    showLoading(false);
+    updateSyncStatus('error');
+    alert("फोटो अपलोड करने में समस्या हुई!");
+    return "";
+  }
+}
+
+// Show photo in modal
+function showPhoto(photoUrl) {
+  if (!photoUrl) return;
+  document.getElementById('modalImage').src = photoUrl;
+  document.getElementById('photoModal').style.display = 'flex';
+}
+
+function closePhotoModal() {
+  document.getElementById('photoModal').style.display = 'none';
 }
 
 // ==================== SAVE DATA ====================
-function saveData() {
+async function saveData() {
   let name = nameEl.value.trim();
   let village = villageEl.value.trim();
 
@@ -633,22 +872,26 @@ function saveData() {
   }
 
   let file = photoEl.files[0];
+  let photoURL = "";
 
   if (file) {
-    getBase64(file, (base64) => processSave(base64));
+    photoURL = await uploadPhoto(file);
+    if (!photoURL) return; // Upload failed
   } else {
     // If editing, keep old photo
-    let oldPhoto = "";
     if (editIndex !== -1 && people[editIndex]) {
-      oldPhoto = people[editIndex].photo || "";
+      photoURL = people[editIndex].photo || "";
     }
-    processSave(oldPhoto);
   }
+
+  processSave(photoURL);
 }
 
 function processSave(photo) {
+  updateSyncStatus('syncing');
+  showLoading(true);
+  
   let person = {
-    id: Date.now() + Math.random(), // unique ID
     name: nameEl.value,
     village: villageEl.value,
     relation: relationEl.value,
@@ -660,35 +903,44 @@ function processSave(photo) {
     familyHead: familyHeadEl.value,
     notes: notesEl.value,
     photo: photo,
-    createdAt: new Date().toISOString()
+    updatedAt: new Date().toISOString()
   };
 
   if (editIndex === -1) {
-    // Add new person
-    people.push(person);
+    // Add new person to Firebase
+    person.createdAt = new Date().toISOString();
+    peopleRef.push(person)
+      .then(() => {
+        clearForm();
+        showLoading(false);
+        updateSyncStatus('synced');
+        party.confetti();
+        alert("✅ डेटा सफलतापूर्वक सेव हो गया!");
+      })
+      .catch((error) => {
+        console.error("Firebase save error:", error);
+        showLoading(false);
+        updateSyncStatus('error');
+        alert("डेटा सेव करने में समस्या हुई! कृपया पुनः प्रयास करें।");
+      });
   } else {
-    // Update existing person
-    people[editIndex] = person;
-    editIndex = -1;
+    // Update existing person in Firebase
+    const firebaseKey = people[editIndex].firebaseKey;
+    peopleRef.child(firebaseKey).update(person)
+      .then(() => {
+        clearForm();
+        editIndex = -1;
+        showLoading(false);
+        updateSyncStatus('synced');
+        alert("✅ डेटा अपडेट हो गया!");
+      })
+      .catch((error) => {
+        console.error("Firebase update error:", error);
+        showLoading(false);
+        updateSyncStatus('error');
+        alert("डेटा अपडेट करने में समस्या हुई! कृपया पुनः प्रयास करें।");
+      });
   }
-
-  // Save to localStorage
-  localStorage.setItem("advancePeople", JSON.stringify(people));
-  
-  // Clear form and refresh display
-  clearForm();
-  
-  // Update everything
-  updateFamilyHeadOptions();
-  updateFilters();
-  showData();
-  updateStats();
-  updateUpcomingBirthdays();
-  updateGotraStats();
-  initChart();
-  
-  // Success message
-  alert("✅ डेटा सफलतापूर्वक सेव हो गया!");
 }
 
 // ==================== CLEAR FORM ====================
@@ -710,16 +962,35 @@ function clearForm() {
 // ==================== DELETE DATA ====================
 function deleteData(id) {
   if (confirm("क्या आप सच में डिलीट करना चाहते हैं?")) {
-    people = people.filter(p => p.id != id);
-    localStorage.setItem("advancePeople", JSON.stringify(people));
-    loadData(); // Reload all data
-    alert("✅ डेटा डिलीट हो गया!");
+    updateSyncStatus('syncing');
+    showLoading(true);
+    
+    // Find the person by id
+    const person = people.find(p => p.id === id);
+    if (!person || !person.firebaseKey) {
+      showLoading(false);
+      return;
+    }
+    
+    // Delete from Firebase
+    peopleRef.child(person.firebaseKey).remove()
+      .then(() => {
+        showLoading(false);
+        updateSyncStatus('synced');
+        alert("✅ डेटा डिलीट हो गया!");
+      })
+      .catch((error) => {
+        console.error("Firebase delete error:", error);
+        showLoading(false);
+        updateSyncStatus('error');
+        alert("डेटा डिलीट करने में समस्या हुई!");
+      });
   }
 }
 
 // ==================== EDIT DATA ====================
 function editData(id) {
-  let index = people.findIndex(p => p.id == id);
+  let index = people.findIndex(p => p.id === id);
   if (index === -1) return;
 
   let p = people[index];
@@ -743,6 +1014,7 @@ function editData(id) {
 // ==================== DISPLAY DATA ====================
 function showData(filteredData = null) {
   let dataToShow = filteredData || people;
+  currentFilteredData = filteredData;
   
   if (dataToShow.length === 0) {
     list.innerHTML = `
@@ -761,316 +1033,4 @@ function showData(filteredData = null) {
     grouped[p.village].push(p);
   });
 
-  let html = "";
-  
-  // Sort villages
-  Object.keys(grouped).sort().forEach(village => {
-    html += `<h3 style="grid-column: 1/-1; color: white; margin: 10px 0;">
-      <i class="fas fa-home"></i> ${village} (${grouped[village].length})
-    </h3>`;
-
-    grouped[village].forEach(p => {
-      let age = p.birthday ? calculateAge(p.birthday) : "";
-      
-      html += `
-      <div class="relative-card" data-id="${p.id}">
-        <div class="card-header">
-          <span class="relation-badge">
-            <i class="fas fa-${p.gender === 'पुरुष' ? 'mars' : p.gender === 'महिला' ? 'venus' : 'genderless'}"></i>
-            ${p.relation || 'रिश्ता'}
-          </span>
-        </div>
-        <div class="card-body">
-          <img src="${p.photo || 'https://via.placeholder.com/80?text=' + p.name.charAt(0)}" class="avatar" 
-               onerror="this.src='https://via.placeholder.com/80?text=' + this.alt" alt="${p.name}">
-          <div class="info">
-            <div class="info-item">
-              <i class="fas fa-user"></i>
-              <strong>${p.name}</strong>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-phone"></i>
-              <a href="tel:${p.phone}">${p.phone || 'नंबर नहीं'}</a>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-om"></i>
-              <span>${p.gotra || 'गोत्र नहीं'}</span>
-            </div>
-            ${age ? `
-            <div class="info-item">
-              <i class="fas fa-calendar"></i>
-              <span>${age}</span>
-            </div>
-            ` : ''}
-            <div class="tags">
-              ${p.birthday ? `<span class="tag"><i class="fas fa-birthday-cake"></i> ${formatDate(p.birthday)}</span>` : ''}
-              ${p.familyHead ? `<span class="tag"><i class="fas fa-crown"></i> मुखिया</span>` : ''}
-            </div>
-          </div>
-        </div>
-        <div class="card-footer">
-          ${p.phone ? `
-          <a href="tel:${p.phone}" class="action-btn call-btn">
-            <i class="fas fa-phone-alt"></i> कॉल
-          </a>
-          <a href="https://wa.me/${p.phone.replace(/\D/g,'')}" target="_blank" class="action-btn whatsapp-btn">
-            <i class="fab fa-whatsapp"></i> WhatsApp
-          </a>
-          ` : ''}
-          <button class="action-btn edit-btn" onclick="editData('${p.id}')">
-            <i class="fas fa-edit"></i> एडिट
-          </button>
-          <button class="action-btn delete-btn" onclick="deleteData('${p.id}')">
-            <i class="fas fa-trash"></i> डिलीट
-          </button>
-        </div>
-        ${p.notes ? `
-        <div style="padding: 10px; background: #f8f9fa; border-top: 1px solid #eee; font-size: 12px;">
-          <i class="fas fa-sticky-note"></i> ${p.notes}
-        </div>
-        ` : ''}
-      </div>
-      `;
-    });
-  });
-
-  list.innerHTML = html;
-}
-
-// ==================== HELPER FUNCTIONS ====================
-function calculateAge(birthday) {
-  let birthDate = new Date(birthday);
-  let today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  let m = today.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-  return age + " साल";
-}
-
-function formatDate(date) {
-  let d = new Date(date);
-  return d.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short' });
-}
-
-// ==================== SEARCH & FILTER ====================
-function searchData() {
-  let term = search.value.toLowerCase();
-  let filtered = people.filter(p => 
-    p.name.toLowerCase().includes(term) ||
-    p.village.toLowerCase().includes(term) ||
-    (p.phone && p.phone.includes(term)) ||
-    (p.relation && p.relation.toLowerCase().includes(term)) ||
-    (p.gotra && p.gotra.toLowerCase().includes(term))
-  );
-  showData(filtered);
-}
-
-function filterByVillage() {
-  let village = filterVillage.value;
-  if (!village) {
-    showData();
-    return;
-  }
-  let filtered = people.filter(p => p.village === village);
-  showData(filtered);
-}
-
-function filterByRelation() {
-  let relation = filterRelation.value;
-  if (!relation) {
-    showData();
-    return;
-  }
-  let filtered = people.filter(p => p.relation === relation);
-  showData(filtered);
-}
-
-// Update filter dropdowns
-function updateFilters() {
-  // Village filter
-  let villages = [...new Set(people.map(p => p.village))];
-  filterVillage.innerHTML = '<option value="">सभी गांव</option>';
-  villages.sort().forEach(v => {
-    filterVillage.innerHTML += `<option value="${v}">${v}</option>`;
-  });
-
-  // Relation filter
-  let relations = [...new Set(people.map(p => p.relation))];
-  filterRelation.innerHTML = '<option value="">सभी रिश्ते</option>';
-  relations.sort().forEach(r => {
-    if (r) filterRelation.innerHTML += `<option value="${r}">${r}</option>`;
-  });
-}
-
-// Update family head dropdown
-function updateFamilyHeadOptions() {
-  familyHeadEl.innerHTML = '<option value="">कोई नहीं (खुद मुखिया)</option>';
-  people.forEach(p => {
-    familyHeadEl.innerHTML += `<option value="${p.id}">${p.name} (${p.village})</option>`;
-  });
-}
-
-// ==================== STATS ====================
-function updateStats() {
-  document.getElementById("totalCount").textContent = people.length;
-  
-  let families = new Set(people.map(p => p.village)).size;
-  document.getElementById("familyCount").textContent = families;
-  
-  let today = new Date();
-  let next7Days = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-  
-  let birthdays = people.filter(p => {
-    if (!p.birthday) return false;
-    let bd = new Date(p.birthday);
-    bd.setFullYear(today.getFullYear());
-    return bd >= today && bd <= next7Days;
-  }).length;
-  
-  document.getElementById("birthdayCount").textContent = birthdays;
-}
-
-function updateUpcomingBirthdays() {
-  let today = new Date();
-  let upcoming = people.filter(p => p.birthday).map(p => {
-    let bd = new Date(p.birthday);
-    bd.setFullYear(today.getFullYear());
-    if (bd < today) bd.setFullYear(today.getFullYear() + 1);
-    return { ...p, nextBirthday: bd };
-  }).sort((a, b) => a.nextBirthday - b.nextBirthday).slice(0, 5);
-
-  let html = "";
-  upcoming.forEach(p => {
-    let days = Math.ceil((p.nextBirthday - today) / (1000 * 60 * 60 * 24));
-    html += `
-    <div class="upcoming-item">
-      <div class="date">
-        <i class="fas fa-calendar-alt"></i> ${formatDate(p.birthday)}
-        ${days <= 7 ? '<span style="color: #f59e0b;"> (अगले ' + days + ' दिन)</span>' : ''}
-      </div>
-      <div class="name">${p.name}</div>
-      <small>${p.relation || ''} • ${p.village}</small>
-    </div>
-    `;
-  });
-
-  if (upcoming.length === 0) {
-    html = '<p style="color: #999; text-align: center;">कोई आने वाला जन्मदिन नहीं</p>';
-  }
-
-  document.getElementById("upcomingBirthdays").innerHTML = html;
-}
-
-function updateGotraStats() {
-  let gotras = {};
-  people.forEach(p => {
-    if (p.gotra) {
-      gotras[p.gotra] = (gotras[p.gotra] || 0) + 1;
-    }
-  });
-
-  let sortedGotras = Object.entries(gotras).sort((a, b) => b[1] - a[1]);
-  
-  let html = "";
-  sortedGotras.forEach(([gotra, count]) => {
-    html += `
-    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
-      <span><i class="fas fa-om"></i> ${gotra}</span>
-      <span class="badge">${count}</span>
-    </div>
-    `;
-  });
-
-  if (sortedGotras.length === 0) {
-    html = '<p style="color: #999; text-align: center;">कोई गोत्र डेटा नहीं</p>';
-  }
-
-  document.getElementById("gotraStats").innerHTML = html;
-}
-
-function initChart() {
-  let ctx = document.getElementById('relationChart').getContext('2d');
-  
-  let relations = {};
-  people.forEach(p => {
-    if (p.relation) {
-      relations[p.relation] = (relations[p.relation] || 0) + 1;
-    }
-  });
-
-  if (relationChart) {
-    relationChart.destroy();
-  }
-
-  relationChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(relations),
-      datasets: [{
-        data: Object.values(relations),
-        backgroundColor: ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899']
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          display: false
-        }
-      }
-    }
-  });
-}
-
-// ==================== EXPORT FUNCTIONS ====================
-function exportExcel() {
-  if (people.length === 0) {
-    alert("कोई डेटा नहीं है");
-    return;
-  }
-
-  let data = people.map(p => ({
-    'नाम': p.name,
-    'गांव': p.village,
-    'रिश्ता': p.relation,
-    'फोन': p.phone,
-    'गोत्र': p.gotra,
-    'जन्मदिन': p.birthday,
-    'लिंग': p.gender,
-    'नोट्स': p.notes
-  }));
-
-  let ws = XLSX.utils.json_to_sheet(data);
-  let wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Rishtedar");
-  XLSX.writeFile(wb, "Rishtedar_Data.xlsx");
-}
-
-function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  let doc = new jsPDF();
-  
-  doc.text("रिश्तेदार सूची", 10, 10);
-  
-  let y = 20;
-  people.forEach((p, i) => {
-    let line = `${i+1}. ${p.name} (${p.relation}) - ${p.village} - ${p.phone || 'नंबर नहीं'}`;
-    doc.text(line, 10, y);
-    y += 7;
-    if (y > 280) {
-      doc.addPage();
-      y = 20;
-    }
-  });
-
-  doc.save("Rishtedar.pdf");
-}
-
-function printData() {
-  window.print();
-}
-</script>
-
-</body>
-</html>
+  let html =

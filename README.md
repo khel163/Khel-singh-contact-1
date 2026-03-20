@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -148,6 +148,7 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .search-box {
@@ -167,6 +168,14 @@ input:focus, select:focus, textarea:focus {
 .search-box input {
   padding-left: 35px;
   width: 100%;
+}
+
+.filter-select {
+  width: 180px;
+  padding: 8px 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
 }
 
 /* Main Content */
@@ -268,7 +277,6 @@ input:focus, select:focus, textarea:focus {
 .edit-btn { background: #3b82f6; color: white; }
 .delete-btn { background: #ef4444; color: white; }
 .whatsapp-btn { background: #25D366; color: white; }
-.family-btn { background: #8b5cf6; color: white; }
 
 /* Sidebar */
 .sidebar {
@@ -311,30 +319,6 @@ input:focus, select:focus, textarea:focus {
   color: #333;
 }
 
-/* Family Tree Modal */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  z-index: 1000;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 20px;
-  padding: 20px;
-  max-width: 800px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
 /* Tags */
 .tags {
   display: flex;
@@ -373,6 +357,15 @@ input:focus, select:focus, textarea:focus {
   
   .card-footer {
     grid-template-columns: 1fr;
+  }
+  
+  .search-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-select {
+    width: 100%;
   }
 }
 </style>
@@ -510,7 +503,7 @@ input:focus, select:focus, textarea:focus {
       <button class="btn btn-success" onclick="clearForm()">
         <i class="fas fa-undo"></i> क्लियर
       </button>
-      <button class="btn btn-info" onclick="init()">
+      <button class="btn btn-info" onclick="loadData()">
         <i class="fas fa-sync-alt"></i> रिफ्रेश
       </button>
     </div>
@@ -522,10 +515,10 @@ input:focus, select:focus, textarea:focus {
       <i class="fas fa-search"></i>
       <input type="text" id="search" placeholder="नाम, गांव, फोन, रिश्ता, गोत्र से खोजें..." onkeyup="searchData()">
     </div>
-    <select id="filterVillage" onchange="filterByVillage()" style="width: 200px; padding-left: 10px;">
+    <select class="filter-select" id="filterVillage" onchange="filterByVillage()">
       <option value="">सभी गांव</option>
     </select>
-    <select id="filterRelation" onchange="filterByRelation()" style="width: 200px; padding-left: 10px;">
+    <select class="filter-select" id="filterRelation" onchange="filterByRelation()">
       <option value="">सभी रिश्ते</option>
     </select>
     <div class="btn-group">
@@ -537,12 +530,6 @@ input:focus, select:focus, textarea:focus {
       </button>
       <button class="btn btn-warning" onclick="printData()">
         <i class="fas fa-print"></i> Print
-      </button>
-      <button class="btn btn-info" onclick="backupData()">
-        <i class="fas fa-download"></i> Backup
-      </button>
-      <button class="btn btn-primary" onclick="restoreData()">
-        <i class="fas fa-upload"></i> Restore
       </button>
     </div>
   </div>
@@ -576,31 +563,49 @@ input:focus, select:focus, textarea:focus {
 </div>
 
 <script>
-let people = JSON.parse(localStorage.getItem("advancePeople")) || [];
+// ==================== GLOBAL VARIABLES ====================
+let people = [];
 let editIndex = -1;
 
 // DOM Elements
-let nameEl = document.getElementById("name");
-let villageEl = document.getElementById("village");
-let relationEl = document.getElementById("relation");
-let phoneEl = document.getElementById("phone");
-let mapEl = document.getElementById("map");
-let birthdayEl = document.getElementById("birthday");
-let gotraEl = document.getElementById("gotra");
-let genderEl = document.getElementById("gender");
-let familyHeadEl = document.getElementById("familyHead");
-let notesEl = document.getElementById("notes");
-let photoEl = document.getElementById("photo");
-let list = document.getElementById("list");
-let search = document.getElementById("search");
-let filterVillage = document.getElementById("filterVillage");
-let filterRelation = document.getElementById("filterRelation");
+let nameEl, villageEl, relationEl, phoneEl, mapEl, birthdayEl, gotraEl, genderEl, familyHeadEl, notesEl, photoEl;
+let list, search, filterVillage, filterRelation;
 
 // Chart instance
 let relationChart = null;
 
-// Initialize
-function init() {
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', function() {
+  // Get DOM elements
+  nameEl = document.getElementById("name");
+  villageEl = document.getElementById("village");
+  relationEl = document.getElementById("relation");
+  phoneEl = document.getElementById("phone");
+  mapEl = document.getElementById("map");
+  birthdayEl = document.getElementById("birthday");
+  gotraEl = document.getElementById("gotra");
+  genderEl = document.getElementById("gender");
+  familyHeadEl = document.getElementById("familyHead");
+  notesEl = document.getElementById("notes");
+  photoEl = document.getElementById("photo");
+  list = document.getElementById("list");
+  search = document.getElementById("search");
+  filterVillage = document.getElementById("filterVillage");
+  filterRelation = document.getElementById("filterRelation");
+  
+  // Load data from localStorage
+  loadData();
+});
+
+// Load data from localStorage
+function loadData() {
+  let savedData = localStorage.getItem("advancePeople");
+  if (savedData) {
+    people = JSON.parse(savedData);
+  } else {
+    people = [];
+  }
+  editIndex = -1;
   updateFamilyHeadOptions();
   updateFilters();
   showData();
@@ -610,20 +615,19 @@ function init() {
   initChart();
 }
 
-// Photo to Base64
+// ==================== PHOTO HANDLING ====================
 function getBase64(file, callback) {
   let reader = new FileReader();
   reader.onload = () => callback(reader.result);
   reader.readAsDataURL(file);
 }
 
-// Save Data
+// ==================== SAVE DATA ====================
 function saveData() {
   let name = nameEl.value.trim();
   let village = villageEl.value.trim();
 
   if (!name || !village) {
-    party.confetti();
     alert("❌ नाम और गांव जरूरी है");
     return;
   }
@@ -633,13 +637,18 @@ function saveData() {
   if (file) {
     getBase64(file, (base64) => processSave(base64));
   } else {
-    processSave(people[editIndex]?.photo || "");
+    // If editing, keep old photo
+    let oldPhoto = "";
+    if (editIndex !== -1 && people[editIndex]) {
+      oldPhoto = people[editIndex].photo || "";
+    }
+    processSave(oldPhoto);
   }
 }
 
 function processSave(photo) {
   let person = {
-    id: Date.now() + Math.random(),
+    id: Date.now() + Math.random(), // unique ID
     name: nameEl.value,
     village: villageEl.value,
     relation: relationEl.value,
@@ -655,19 +664,34 @@ function processSave(photo) {
   };
 
   if (editIndex === -1) {
+    // Add new person
     people.push(person);
-    party.confetti();
   } else {
+    // Update existing person
     people[editIndex] = person;
     editIndex = -1;
   }
 
+  // Save to localStorage
   localStorage.setItem("advancePeople", JSON.stringify(people));
+  
+  // Clear form and refresh display
   clearForm();
-  init();
+  
+  // Update everything
+  updateFamilyHeadOptions();
+  updateFilters();
+  showData();
+  updateStats();
+  updateUpcomingBirthdays();
+  updateGotraStats();
+  initChart();
+  
+  // Success message
+  alert("✅ डेटा सफलतापूर्वक सेव हो गया!");
 }
 
-// Clear Form
+// ==================== CLEAR FORM ====================
 function clearForm() {
   nameEl.value = "";
   villageEl.value = "";
@@ -683,35 +707,25 @@ function clearForm() {
   editIndex = -1;
 }
 
-// Delete with animation
+// ==================== DELETE DATA ====================
 function deleteData(id) {
   if (confirm("क्या आप सच में डिलीट करना चाहते हैं?")) {
-    let card = document.querySelector(`[data-id="${id}"]`);
-    if (card) {
-      card.style.transform = "scale(0)";
-      card.style.opacity = "0";
-      setTimeout(() => {
-        people = people.filter(p => p.id !== id);
-        localStorage.setItem("advancePeople", JSON.stringify(people));
-        init();
-      }, 300);
-    } else {
-      people = people.filter(p => p.id !== id);
-      localStorage.setItem("advancePeople", JSON.stringify(people));
-      init();
-    }
+    people = people.filter(p => p.id != id);
+    localStorage.setItem("advancePeople", JSON.stringify(people));
+    loadData(); // Reload all data
+    alert("✅ डेटा डिलीट हो गया!");
   }
 }
 
-// Edit
+// ==================== EDIT DATA ====================
 function editData(id) {
-  let index = people.findIndex(p => p.id === id);
+  let index = people.findIndex(p => p.id == id);
   if (index === -1) return;
 
   let p = people[index];
   nameEl.value = p.name;
   villageEl.value = p.village;
-  relationEl.value = p.relation;
+  relationEl.value = p.relation || "";
   phoneEl.value = p.phone || "";
   mapEl.value = p.map || "";
   birthdayEl.value = p.birthday || "";
@@ -726,7 +740,7 @@ function editData(id) {
   document.querySelector(".form-section").scrollIntoView({ behavior: "smooth" });
 }
 
-// Show Data
+// ==================== DISPLAY DATA ====================
 function showData(filteredData = null) {
   let dataToShow = filteredData || people;
   
@@ -803,10 +817,10 @@ function showData(filteredData = null) {
             <i class="fab fa-whatsapp"></i> WhatsApp
           </a>
           ` : ''}
-          <button class="action-btn edit-btn" onclick="editData(${p.id})">
+          <button class="action-btn edit-btn" onclick="editData('${p.id}')">
             <i class="fas fa-edit"></i> एडिट
           </button>
-          <button class="action-btn delete-btn" onclick="deleteData(${p.id})">
+          <button class="action-btn delete-btn" onclick="deleteData('${p.id}')">
             <i class="fas fa-trash"></i> डिलीट
           </button>
         </div>
@@ -823,7 +837,7 @@ function showData(filteredData = null) {
   list.innerHTML = html;
 }
 
-// Calculate Age
+// ==================== HELPER FUNCTIONS ====================
 function calculateAge(birthday) {
   let birthDate = new Date(birthday);
   let today = new Date();
@@ -833,13 +847,12 @@ function calculateAge(birthday) {
   return age + " साल";
 }
 
-// Format Date
 function formatDate(date) {
   let d = new Date(date);
   return d.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short' });
 }
 
-// Search
+// ==================== SEARCH & FILTER ====================
 function searchData() {
   let term = search.value.toLowerCase();
   let filtered = people.filter(p => 
@@ -852,7 +865,6 @@ function searchData() {
   showData(filtered);
 }
 
-// Filter by Village
 function filterByVillage() {
   let village = filterVillage.value;
   if (!village) {
@@ -863,7 +875,6 @@ function filterByVillage() {
   showData(filtered);
 }
 
-// Filter by Relation
 function filterByRelation() {
   let relation = filterRelation.value;
   if (!relation) {
@@ -874,7 +885,7 @@ function filterByRelation() {
   showData(filtered);
 }
 
-// Update Filters
+// Update filter dropdowns
 function updateFilters() {
   // Village filter
   let villages = [...new Set(people.map(p => p.village))];
@@ -891,7 +902,7 @@ function updateFilters() {
   });
 }
 
-// Update Family Head Options
+// Update family head dropdown
 function updateFamilyHeadOptions() {
   familyHeadEl.innerHTML = '<option value="">कोई नहीं (खुद मुखिया)</option>';
   people.forEach(p => {
@@ -899,7 +910,7 @@ function updateFamilyHeadOptions() {
   });
 }
 
-// Update Stats
+// ==================== STATS ====================
 function updateStats() {
   document.getElementById("totalCount").textContent = people.length;
   
@@ -919,7 +930,6 @@ function updateStats() {
   document.getElementById("birthdayCount").textContent = birthdays;
 }
 
-// Update Upcoming Birthdays
 function updateUpcomingBirthdays() {
   let today = new Date();
   let upcoming = people.filter(p => p.birthday).map(p => {
@@ -951,7 +961,6 @@ function updateUpcomingBirthdays() {
   document.getElementById("upcomingBirthdays").innerHTML = html;
 }
 
-// Update Gotra Stats
 function updateGotraStats() {
   let gotras = {};
   people.forEach(p => {
@@ -979,7 +988,6 @@ function updateGotraStats() {
   document.getElementById("gotraStats").innerHTML = html;
 }
 
-// Initialize Chart
 function initChart() {
   let ctx = document.getElementById('relationChart').getContext('2d');
   
@@ -1000,4 +1008,69 @@ function initChart() {
       labels: Object.keys(relations),
       datasets: [{
         data: Object.values(relations),
-        backgroundColor: ['
+        backgroundColor: ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
+    }
+  });
+}
+
+// ==================== EXPORT FUNCTIONS ====================
+function exportExcel() {
+  if (people.length === 0) {
+    alert("कोई डेटा नहीं है");
+    return;
+  }
+
+  let data = people.map(p => ({
+    'नाम': p.name,
+    'गांव': p.village,
+    'रिश्ता': p.relation,
+    'फोन': p.phone,
+    'गोत्र': p.gotra,
+    'जन्मदिन': p.birthday,
+    'लिंग': p.gender,
+    'नोट्स': p.notes
+  }));
+
+  let ws = XLSX.utils.json_to_sheet(data);
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Rishtedar");
+  XLSX.writeFile(wb, "Rishtedar_Data.xlsx");
+}
+
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+  
+  doc.text("रिश्तेदार सूची", 10, 10);
+  
+  let y = 20;
+  people.forEach((p, i) => {
+    let line = `${i+1}. ${p.name} (${p.relation}) - ${p.village} - ${p.phone || 'नंबर नहीं'}`;
+    doc.text(line, 10, y);
+    y += 7;
+    if (y > 280) {
+      doc.addPage();
+      y = 20;
+    }
+  });
+
+  doc.save("Rishtedar.pdf");
+}
+
+function printData() {
+  window.print();
+}
+</script>
+
+</body>
+</html>

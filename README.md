@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📱 रिश्तेदार मैनेजर (Local Storage + Import/Export)</title>
+<title>📱 रिश्तेदार मैनेजर (परिवार व्यू)</title>
 
 <!-- Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -158,39 +158,295 @@ input:focus, select:focus, textarea:focus {
 .search-section {
   background: white;
   border-radius: 20px;
-  padding: 15px;
+  padding: 20px;
   margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.search-header h3 {
+  color: #333;
+  font-size: 18px;
+}
+
+.search-header h3 i {
+  color: #667eea;
+  margin-right: 8px;
+}
+
+.search-box-container {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .search-box {
-  flex: 1;
+  flex: 2;
   position: relative;
-  min-width: 200px;
+  min-width: 300px;
 }
 
 .search-box i {
   position: absolute;
-  left: 10px;
+  left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #999;
+  color: #667eea;
+  font-size: 16px;
 }
 
 .search-box input {
-  padding-left: 35px;
   width: 100%;
+  padding: 15px 15px 15px 45px;
+  border: 2px solid #e0e0e0;
+  border-radius: 50px;
+  font-size: 16px;
+  transition: all 0.3s;
+  background: #f8f9fa;
+}
+
+.search-box input:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+  background: white;
+}
+
+.search-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
 }
 
 .filter-select {
-  width: 180px;
-  padding: 8px 10px;
+  flex: 1;
+  min-width: 150px;
+  padding: 12px 15px;
   border: 2px solid #e0e0e0;
-  border-radius: 10px;
+  border-radius: 50px;
   font-size: 14px;
+  background: #f8f9fa;
+  cursor: pointer;
+}
+
+/* Navigation */
+.navigation {
+  background: white;
+  border-radius: 20px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.nav-item:hover {
+  background: #f0f0f0;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.nav-item i {
+  font-size: 16px;
+}
+
+.current-family {
+  margin-left: auto;
+  font-weight: bold;
+  color: #667eea;
+  background: #f0f4ff;
+  padding: 8px 20px;
+  border-radius: 50px;
+}
+
+/* Family View */
+.family-view {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  border: 3px solid #667eea;
+}
+
+.family-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.family-header h2 {
+  color: #333;
+  font-size: 24px;
+}
+
+.family-header h2 i {
+  color: #667eea;
+  margin-right: 10px;
+}
+
+.family-info {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 10px 25px;
+  border-radius: 50px;
+  font-size: 16px;
+}
+
+.back-button {
+  background: #f0f0f0;
+  color: #333;
+  padding: 10px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  margin-bottom: 20px;
+}
+
+.back-button:hover {
+  background: #e0e0e0;
+}
+
+/* Family Head Card (मुख्य लिस्ट में) */
+.family-head-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  position: relative;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.family-head-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  border-color: #f59e0b;
+}
+
+.family-head-card .card-header {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: white;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.member-count {
+  background: rgba(255,255,255,0.2);
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 12px;
+}
+
+.family-head-card .card-body {
+  padding: 15px;
+  display: flex;
+  gap: 15px;
+}
+
+.family-members-preview {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #666;
+}
+
+.family-members-preview i {
+  color: #f59e0b;
+  margin-right: 5px;
+}
+
+/* Member Card (परिवार के अंदर) */
+.member-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  position: relative;
+  border-left: 4px solid #667eea;
+}
+
+.member-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.member-card .card-header {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.member-card .card-body {
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+}
+
+.member-card .avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #667eea;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #667eea;
+}
+
+/* Cards Grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Member Grid */
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 15px;
 }
 
 /* Import/Export Section */
@@ -227,112 +483,6 @@ input:focus, select:focus, textarea:focus {
   width: 250px;
 }
 
-/* Main Content */
-.main-content {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 20px;
-}
-
-/* Cards Grid */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
-}
-
-.relative-card {
-  background: white;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-  transition: all 0.3s;
-  position: relative;
-}
-
-.relative-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.card-header {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.relation-badge {
-  background: rgba(255,255,255,0.2);
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-}
-
-.card-body {
-  padding: 15px;
-  display: flex;
-  gap: 15px;
-}
-
-.avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #667eea;
-  background: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  color: #667eea;
-}
-
-.info {
-  flex: 1;
-}
-
-.info-item {
-  margin: 8px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.info-item i {
-  color: #667eea;
-  width: 20px;
-}
-
-.card-footer {
-  padding: 15px;
-  border-top: 1px solid #eee;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.action-btn {
-  padding: 8px 15px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  transition: all 0.3s;
-  justify-content: center;
-}
-
-.call-btn { background: #10b981; color: white; }
-.edit-btn { background: #3b82f6; color: white; }
-.delete-btn { background: #ef4444; color: white; }
-.whatsapp-btn { background: #25D366; color: white; }
-
 /* Sidebar */
 .sidebar {
   display: flex;
@@ -361,6 +511,13 @@ input:focus, select:focus, textarea:focus {
   border-radius: 8px;
   margin-bottom: 8px;
   border-left: 4px solid #667eea;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.upcoming-item:hover {
+  transform: translateX(5px);
+  background: #f0f4ff;
 }
 
 .upcoming-item .date {
@@ -434,10 +591,6 @@ input:focus, select:focus, textarea:focus {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .main-content {
-    grid-template-columns: 1fr;
-  }
-  
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -450,13 +603,16 @@ input:focus, select:focus, textarea:focus {
     width: 100%;
   }
   
-  .card-footer {
-    grid-template-columns: 1fr;
+  .search-box-container {
+    flex-direction: column;
   }
   
-  .search-section {
-    flex-direction: column;
-    align-items: stretch;
+  .search-box {
+    width: 100%;
+  }
+  
+  .search-filters {
+    width: 100%;
   }
   
   .filter-select {
@@ -470,6 +626,17 @@ input:focus, select:focus, textarea:focus {
   
   .import-file-input input[type=file] {
     width: 100%;
+  }
+  
+  .navigation {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .current-family {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
   }
 }
 </style>
@@ -585,6 +752,13 @@ input:focus, select:focus, textarea:focus {
           <option value="अन्य">अन्य</option>
         </select>
       </div>
+      <!-- परिवार मुखिया का ऑप्शन -->
+      <div class="form-group">
+        <i class="fas fa-crown"></i>
+        <select id="familyHead">
+          <option value="">परिवार मुखिया चुनें</option>
+        </select>
+      </div>
     </div>
 
     <div class="form-group" style="margin-bottom: 15px;">
@@ -607,19 +781,43 @@ input:focus, select:focus, textarea:focus {
 
   <!-- Search Section -->
   <div class="search-section">
-    <div class="search-box">
-      <i class="fas fa-search"></i>
-      <input type="text" id="search" placeholder="नाम, गांव, फोन, रिश्ता से खोजें..." onkeyup="searchData()">
+    <div class="search-header">
+      <h3><i class="fas fa-search"></i> खोजें</h3>
     </div>
-    <select class="filter-select" id="filterVillage" onchange="filterByVillage()">
-      <option value="">सभी गांव</option>
-    </select>
-    <select class="filter-select" id="filterRelation" onchange="filterByRelation()">
-      <option value="">सभी रिश्ते</option>
-    </select>
+    
+    <div class="search-box-container">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="search" placeholder="नाम, गांव, फोन, रिश्ता से खोजें..." onkeyup="searchData()" autocomplete="off">
+      </div>
+      
+      <div class="search-filters">
+        <select class="filter-select" id="filterVillage" onchange="filterByVillage()">
+          <option value="">सभी गांव</option>
+        </select>
+        <select class="filter-select" id="filterRelation" onchange="filterByRelation()">
+          <option value="">सभी रिश्ते</option>
+        </select>
+      </div>
+    </div>
   </div>
 
-  <!-- Import/Export Section (नया फीचर) -->
+  <!-- Navigation -->
+  <div class="navigation" id="navigation">
+    <div class="nav-item active" onclick="showFamilyHeads()">
+      <i class="fas fa-crown"></i>
+      <span>परिवार मुखिया</span>
+    </div>
+    <div class="nav-item" onclick="showAllMembers()">
+      <i class="fas fa-users"></i>
+      <span>सभी सदस्य</span>
+    </div>
+    <div id="currentFamilyDisplay" class="current-family" style="display: none;">
+      <i class="fas fa-home"></i> <span id="currentFamilyName"></span>
+    </div>
+  </div>
+
+  <!-- Import/Export Section -->
   <div class="import-export-section">
     <div class="import-export-title">
       <i class="fas fa-exchange-alt"></i>
@@ -661,7 +859,9 @@ input:focus, select:focus, textarea:focus {
   <!-- Main Content -->
   <div class="main-content">
     <!-- Cards Grid -->
-    <div id="list" class="cards-grid"></div>
+    <div id="contentArea">
+      <!-- यहाँ डेटा दिखेगा -->
+    </div>
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -671,16 +871,16 @@ input:focus, select:focus, textarea:focus {
         <div id="upcomingBirthdays"></div>
       </div>
 
+      <!-- Family Stats -->
+      <div class="sidebar-card">
+        <h3><i class="fas fa-chart-pie"></i> परिवार के आंकड़े</h3>
+        <div id="familyStats"></div>
+      </div>
+
       <!-- Quick Stats -->
       <div class="sidebar-card">
         <h3><i class="fas fa-chart-pie"></i> रिश्तों के आंकड़े</h3>
         <canvas id="relationChart" style="height: 200px;"></canvas>
-      </div>
-
-      <!-- Gotra/Caste Stats -->
-      <div class="sidebar-card">
-        <h3><i class="fas fa-om"></i> गोत्र/जाति आंकड़े</h3>
-        <div id="gotraStats"></div>
       </div>
       
       <!-- Backup Info -->
@@ -688,8 +888,8 @@ input:focus, select:focus, textarea:focus {
         <h3><i class="fas fa-info-circle"></i> जानकारी</h3>
         <p style="font-size: 14px; color: #666;">
           <i class="fas fa-database"></i> डेटा आपके ब्राउज़र की localStorage में सेव है।<br>
-          <i class="fas fa-download"></i> JSON एक्सपोर्ट करके फोन में सेव कर सकते हैं।<br>
-          <i class="fas fa-upload"></i> सेव की हुई फाइल इंपोर्ट कर सकते हैं।
+          <i class="fas fa-crown"></i> परिवार मुखिया पर क्लिक करें।<br>
+          <i class="fas fa-users"></i> पूरा परिवार देखें।
         </p>
       </div>
     </div>
@@ -700,10 +900,13 @@ input:focus, select:focus, textarea:focus {
 // ==================== GLOBAL VARIABLES ====================
 let people = [];
 let editIndex = -1;
+let currentView = 'familyHeads'; // 'familyHeads', 'allMembers', 'family'
+let currentFamilyHeadId = null;
+let searchResults = null;
 
 // DOM Elements
-let nameEl, villageEl, relationEl, phoneEl, mapEl, birthdayEl, gotraEl, genderEl, notesEl;
-let list, search, filterVillage, filterRelation;
+let nameEl, villageEl, relationEl, phoneEl, mapEl, birthdayEl, gotraEl, genderEl, familyHeadEl, notesEl;
+let contentArea, search, filterVillage, filterRelation;
 
 // Chart instance
 let relationChart = null;
@@ -722,8 +925,9 @@ document.addEventListener('DOMContentLoaded', function() {
   birthdayEl = document.getElementById("birthday");
   gotraEl = document.getElementById("gotra");
   genderEl = document.getElementById("gender");
+  familyHeadEl = document.getElementById("familyHead");
   notesEl = document.getElementById("notes");
-  list = document.getElementById("list");
+  contentArea = document.getElementById("contentArea");
   search = document.getElementById("search");
   filterVillage = document.getElementById("filterVillage");
   filterRelation = document.getElementById("filterRelation");
@@ -747,6 +951,10 @@ function loadData() {
     people = [];
   }
   editIndex = -1;
+  currentView = 'familyHeads';
+  currentFamilyHeadId = null;
+  searchResults = null;
+  search.value = '';
   updateUI();
 }
 
@@ -758,18 +966,119 @@ function saveToStorage() {
 
 // Update all UI components
 function updateUI() {
+  updateFamilyHeadOptions();
   updateFilters();
-  showData();
   updateStats();
   updateUpcomingBirthdays();
-  updateGotraStats();
+  updateFamilyStats();
   initChart();
   updateStorageStatus();
+  updateNavigation();
+  renderView();
 }
 
 // Update storage status
 function updateStorageStatus() {
   document.getElementById('storageCount').textContent = people.length;
+}
+
+// Update navigation
+function updateNavigation() {
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  if (currentView === 'familyHeads') {
+    navItems[0].classList.add('active');
+    document.getElementById('currentFamilyDisplay').style.display = 'none';
+  } else if (currentView === 'allMembers') {
+    navItems[1].classList.add('active');
+    document.getElementById('currentFamilyDisplay').style.display = 'none';
+  } else if (currentView === 'family') {
+    navItems[0].classList.add('active');
+    const head = people.find(p => p.id == currentFamilyHeadId);
+    document.getElementById('currentFamilyName').textContent = head ? head.name : '';
+    document.getElementById('currentFamilyDisplay').style.display = 'block';
+  }
+}
+
+// Show family heads view
+function showFamilyHeads() {
+  currentView = 'familyHeads';
+  currentFamilyHeadId = null;
+  searchResults = null;
+  search.value = '';
+  updateNavigation();
+  renderView();
+}
+
+// Show all members view
+function showAllMembers() {
+  currentView = 'allMembers';
+  currentFamilyHeadId = null;
+  searchResults = null;
+  search.value = '';
+  updateNavigation();
+  renderView();
+}
+
+// Show specific family
+function showFamily(headId) {
+  currentView = 'family';
+  currentFamilyHeadId = headId;
+  searchResults = null;
+  search.value = '';
+  updateNavigation();
+  renderView();
+}
+
+// Update family head dropdown
+function updateFamilyHeadOptions() {
+  familyHeadEl.innerHTML = '<option value="">कोई नहीं (खुद मुखिया)</option>';
+  
+  // सभी लोगों को ड्रॉपडाउन में दिखाएँ
+  people.forEach(p => {
+    if (p.name && p.id) {
+      familyHeadEl.innerHTML += `<option value="${p.id}">${p.name} (${p.village})</option>`;
+    }
+  });
+}
+
+// Update family stats in sidebar
+function updateFamilyStats() {
+  // सभी मुखियाओं को ढूँढें
+  const heads = getFamilyHeads();
+  
+  let html = "";
+  if (heads.length === 0) {
+    html = '<p style="color: #999; text-align: center;">कोई परिवार मुखिया नहीं</p>';
+  } else {
+    heads.forEach(head => {
+      const members = getFamilyMembers(head.id);
+      html += `
+      <div class="upcoming-item" style="border-left-color: #f59e0b; cursor: pointer;" onclick="showFamily('${head.id}')">
+        <div class="name">
+          <i class="fas fa-crown" style="color: #f59e0b;"></i> 
+          ${head.name}
+        </div>
+        <small>${head.village} • ${members.length} सदस्य</small>
+      </div>
+      `;
+    });
+  }
+  
+  document.getElementById('familyStats').innerHTML = html;
+}
+
+// Get all family heads (जिनका familyHead खाली है)
+function getFamilyHeads() {
+  return people.filter(p => !p.familyHead || p.familyHead === "");
+}
+
+// Get family members for a head
+function getFamilyMembers(headId) {
+  return people.filter(p => p.familyHead == headId);
 }
 
 // Show alert messages
@@ -789,107 +1098,87 @@ function showAlert(message, type = 'success') {
   }, 3000);
 }
 
-// ==================== SAVE DATA ====================
-function saveData() {
-  let name = nameEl.value.trim();
-  let village = villageEl.value.trim();
+// ==================== RENDER VIEWS ====================
+function renderView() {
+  if (searchResults) {
+    renderSearchResults();
+    return;
+  }
+  
+  if (currentView === 'familyHeads') {
+    renderFamilyHeads();
+  } else if (currentView === 'allMembers') {
+    renderAllMembers();
+  } else if (currentView === 'family') {
+    renderFamily();
+  }
+}
 
-  if (!name || !village) {
-    showAlert('❌ नाम और गांव जरूरी है', 'error');
+// Render family heads (मुख्य लिस्ट)
+function renderFamilyHeads() {
+  const heads = getFamilyHeads();
+  
+  if (heads.length === 0) {
+    contentArea.innerHTML = `
+      <div style="text-align: center; padding: 50px;">
+        <i class="fas fa-crown" style="font-size: 50px; color: #ccc;"></i>
+        <p style="margin-top: 20px;">कोई परिवार मुखिया नहीं है</p>
+      </div>
+    `;
     return;
   }
 
-  let person = {
-    id: Date.now() + Math.random(),
-    name: name,
-    village: village,
-    relation: relationEl.value,
-    phone: phoneEl.value,
-    map: mapEl.value,
-    birthday: birthdayEl.value,
-    gotra: gotraEl.value,
-    gender: genderEl.value,
-    notes: notesEl.value,
-    createdAt: new Date().toISOString()
-  };
-
-  if (editIndex === -1) {
-    people.push(person);
-    showAlert('✅ नया डेटा सेव हो गया!', 'success');
-  } else {
-    people[editIndex] = { ...person, id: people[editIndex].id };
-    editIndex = -1;
-    showAlert('✅ डेटा अपडेट हो गया!', 'success');
-  }
-
-  saveToStorage();
-  clearForm();
-  updateUI();
-}
-
-// ==================== CLEAR FORM ====================
-function clearForm() {
-  nameEl.value = "";
-  villageEl.value = "";
-  relationEl.value = "";
-  phoneEl.value = "";
-  mapEl.value = "";
-  birthdayEl.value = "";
-  gotraEl.value = "";
-  genderEl.value = "";
-  notesEl.value = "";
-  editIndex = -1;
-}
-
-// ==================== DELETE DATA ====================
-function deleteData(id) {
-  if (confirm("क्या आप सच में डिलीट करना चाहते हैं?")) {
-    people = people.filter(p => p.id != id);
-    saveToStorage();
-    updateUI();
-    showAlert('✅ डेटा डिलीट हो गया!', 'success');
-  }
-}
-
-// ==================== CLEAR ALL DATA ====================
-function clearAllData() {
-  if (confirm("⚠️ क्या आप सच में सारा डेटा डिलीट करना चाहते हैं? यह क्रिया वापस नहीं की जा सकती!")) {
-    people = [];
-    saveToStorage();
-    updateUI();
-    showAlert('✅ सारा डेटा डिलीट हो गया!', 'success');
-  }
-}
-
-// ==================== EDIT DATA ====================
-function editData(id) {
-  let index = people.findIndex(p => p.id == id);
-  if (index === -1) return;
-
-  let p = people[index];
-  nameEl.value = p.name;
-  villageEl.value = p.village;
-  relationEl.value = p.relation || "";
-  phoneEl.value = p.phone || "";
-  mapEl.value = p.map || "";
-  birthdayEl.value = p.birthday || "";
-  gotraEl.value = p.gotra || "";
-  genderEl.value = p.gender || "";
-  notesEl.value = p.notes || "";
-
-  editIndex = index;
+  let html = '<div class="cards-grid">';
   
-  // Scroll to form
-  document.querySelector(".form-section").scrollIntoView({ behavior: "smooth" });
+  heads.forEach(head => {
+    const members = getFamilyMembers(head.id);
+    const memberNames = members.slice(0, 3).map(m => m.name).join(', ');
+    const moreCount = members.length - 3;
+    
+    html += `
+      <div class="family-head-card" onclick="showFamily('${head.id}')">
+        <div class="card-header">
+          <span><i class="fas fa-crown"></i> ${head.name}</span>
+          <span class="member-count">${members.length} सदस्य</span>
+        </div>
+        <div class="card-body">
+          <div class="avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="info">
+            <div class="info-item">
+              <i class="fas fa-home"></i>
+              <span>${head.village}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-phone"></i>
+              <span>${head.phone || 'नंबर नहीं'}</span>
+            </div>
+            ${head.gotra ? `
+            <div class="info-item">
+              <i class="fas fa-om"></i>
+              <span>${head.gotra}</span>
+            </div>
+            ` : ''}
+            <div class="family-members-preview">
+              <i class="fas fa-users"></i>
+              ${memberNames} ${moreCount > 0 ? `और ${moreCount} अन्य` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  contentArea.innerHTML = html;
 }
 
-// ==================== DISPLAY DATA ====================
-function showData(filteredData = null) {
-  let dataToShow = filteredData || people;
-  
-  if (dataToShow.length === 0) {
-    list.innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+// Render all members (सभी सदस्य)
+function renderAllMembers() {
+  if (people.length === 0) {
+    contentArea.innerHTML = `
+      <div style="text-align: center; padding: 50px;">
         <i class="fas fa-users-slash" style="font-size: 50px; color: #ccc;"></i>
         <p style="margin-top: 20px;">कोई डेटा नहीं है</p>
       </div>
@@ -899,7 +1188,7 @@ function showData(filteredData = null) {
 
   // Group by village
   let grouped = {};
-  dataToShow.forEach(p => {
+  people.forEach(p => {
     if (!grouped[p.village]) grouped[p.village] = [];
     grouped[p.village].push(p);
   });
@@ -907,15 +1196,154 @@ function showData(filteredData = null) {
   let html = "";
   
   Object.keys(grouped).sort().forEach(village => {
-    html += `<h3 style="grid-column: 1/-1; color: white; margin: 10px 0;">
+    html += `<h3 style="color: white; margin: 20px 0 10px 0;">
       <i class="fas fa-home"></i> ${village} (${grouped[village].length})
     </h3>`;
+    
+    html += '<div class="member-grid">';
 
     grouped[village].forEach(p => {
+      let isHead = !p.familyHead || p.familyHead === "";
       let age = p.birthday ? calculateAge(p.birthday) : "";
       
       html += `
-      <div class="relative-card" data-id="${p.id}">
+        <div class="member-card">
+          <div class="card-header">
+            <span class="relation-badge">
+              <i class="fas fa-${p.gender === 'पुरुष' ? 'mars' : p.gender === 'महिला' ? 'venus' : 'genderless'}"></i>
+              ${p.relation || 'रिश्ता'}
+            </span>
+            ${isHead ? '<span class="family-head-badge"><i class="fas fa-crown"></i> मुखिया</span>' : ''}
+          </div>
+          <div class="card-body">
+            <div class="avatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="info">
+              <div class="info-item">
+                <i class="fas fa-user"></i>
+                <strong>${p.name}</strong>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-phone"></i>
+                <a href="tel:${p.phone}">${p.phone || 'नंबर नहीं'}</a>
+              </div>
+              ${age ? `
+              <div class="info-item">
+                <i class="fas fa-calendar"></i>
+                <span>${age}</span>
+              </div>
+              ` : ''}
+              ${p.familyHead ? `
+              <div class="info-item">
+                <i class="fas fa-crown"></i>
+                <span>मुखिया: ${getPersonName(p.familyHead)}</span>
+              </div>
+              ` : ''}
+              <div class="card-footer" style="padding: 10px 0 0 0; border: none;">
+                ${p.phone ? `
+                <a href="tel:${p.phone}" class="action-btn call-btn" style="padding: 5px 10px;">
+                  <i class="fas fa-phone-alt"></i>
+                </a>
+                <a href="https://wa.me/${p.phone.replace(/\D/g,'')}" target="_blank" class="action-btn whatsapp-btn" style="padding: 5px 10px;">
+                  <i class="fab fa-whatsapp"></i>
+                </a>
+                ` : ''}
+                <button class="action-btn edit-btn" onclick="editData('${p.id}')" style="padding: 5px 10px;">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete-btn" onclick="deleteData('${p.id}')" style="padding: 5px 10px;">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+  });
+
+  contentArea.innerHTML = html;
+}
+
+// Render family members (एक परिवार के सभी सदस्य)
+function renderFamily() {
+  const head = people.find(p => p.id == currentFamilyHeadId);
+  if (!head) {
+    showFamilyHeads();
+    return;
+  }
+  
+  const members = getFamilyMembers(head.id);
+  
+  let html = `
+    <div class="family-view">
+      <div class="family-header">
+        <h2><i class="fas fa-crown" style="color: #f59e0b;"></i> ${head.name} का परिवार</h2>
+        <span class="family-info">${members.length + 1} सदस्य</span>
+      </div>
+      
+      <div class="back-button" onclick="showFamilyHeads()">
+        <i class="fas fa-arrow-left"></i> सभी परिवार देखें
+      </div>
+      
+      <div class="member-grid">
+        <!-- मुखिया को पहले दिखाएँ -->
+        <div class="member-card" style="border-left-color: #f59e0b;">
+          <div class="card-header" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+            <span class="relation-badge">
+              <i class="fas fa-crown"></i> परिवार मुखिया
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="avatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="info">
+              <div class="info-item">
+                <i class="fas fa-user"></i>
+                <strong>${head.name}</strong>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-phone"></i>
+                <a href="tel:${head.phone}">${head.phone || 'नंबर नहीं'}</a>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-home"></i>
+                <span>${head.village}</span>
+              </div>
+              ${head.gotra ? `
+              <div class="info-item">
+                <i class="fas fa-om"></i>
+                <span>${head.gotra}</span>
+              </div>
+              ` : ''}
+              <div class="card-footer" style="padding: 10px 0 0 0; border: none;">
+                ${head.phone ? `
+                <a href="tel:${head.phone}" class="action-btn call-btn" style="padding: 5px 10px;">
+                  <i class="fas fa-phone-alt"></i>
+                </a>
+                <a href="https://wa.me/${head.phone.replace(/\D/g,'')}" target="_blank" class="action-btn whatsapp-btn" style="padding: 5px 10px;">
+                  <i class="fab fa-whatsapp"></i>
+                </a>
+                ` : ''}
+                <button class="action-btn edit-btn" onclick="editData('${head.id}')" style="padding: 5px 10px;">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+  `;
+  
+  // बाकी सदस्य
+  members.forEach(p => {
+    let age = p.birthday ? calculateAge(p.birthday) : "";
+    
+    html += `
+      <div class="member-card">
         <div class="card-header">
           <span class="relation-badge">
             <i class="fas fa-${p.gender === 'पुरुष' ? 'mars' : p.gender === 'महिला' ? 'venus' : 'genderless'}"></i>
@@ -935,96 +1363,291 @@ function showData(filteredData = null) {
               <i class="fas fa-phone"></i>
               <a href="tel:${p.phone}">${p.phone || 'नंबर नहीं'}</a>
             </div>
-            <div class="info-item">
-              <i class="fas fa-om"></i>
-              <span>${p.gotra || 'गोत्र नहीं'}</span>
-            </div>
             ${age ? `
             <div class="info-item">
               <i class="fas fa-calendar"></i>
               <span>${age}</span>
             </div>
             ` : ''}
-            <div class="tags">
-              ${p.birthday ? `<span class="tag"><i class="fas fa-birthday-cake"></i> ${formatDate(p.birthday)}</span>` : ''}
+            <div class="card-footer" style="padding: 10px 0 0 0; border: none;">
+              ${p.phone ? `
+              <a href="tel:${p.phone}" class="action-btn call-btn" style="padding: 5px 10px;">
+                <i class="fas fa-phone-alt"></i>
+              </a>
+              <a href="https://wa.me/${p.phone.replace(/\D/g,'')}" target="_blank" class="action-btn whatsapp-btn" style="padding: 5px 10px;">
+                <i class="fab fa-whatsapp"></i>
+              </a>
+              ` : ''}
+              <button class="action-btn edit-btn" onclick="editData('${p.id}')" style="padding: 5px 10px;">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete-btn" onclick="deleteData('${p.id}')" style="padding: 5px 10px;">
+                <i class="fas fa-trash"></i>
+              </button>
             </div>
           </div>
         </div>
-        <div class="card-footer">
-          ${p.phone ? `
-          <a href="tel:${p.phone}" class="action-btn call-btn">
-            <i class="fas fa-phone-alt"></i> कॉल
-          </a>
-          <a href="https://wa.me/${p.phone.replace(/\D/g,'')}" target="_blank" class="action-btn whatsapp-btn">
-            <i class="fab fa-whatsapp"></i> WhatsApp
-          </a>
-          ` : ''}
-          <button class="action-btn edit-btn" onclick="editData('${p.id}')">
-            <i class="fas fa-edit"></i> एडिट
-          </button>
-          <button class="action-btn delete-btn" onclick="deleteData('${p.id}')">
-            <i class="fas fa-trash"></i> डिलीट
-          </button>
-        </div>
-        ${p.notes ? `
-        <div style="padding: 10px; background: #f8f9fa; border-top: 1px solid #eee; font-size: 12px;">
-          <i class="fas fa-sticky-note"></i> ${p.notes}
-        </div>
-        ` : ''}
       </div>
-      `;
-    });
+    `;
   });
-
-  list.innerHTML = html;
+  
+  html += '</div></div>';
+  contentArea.innerHTML = html;
 }
 
-// ==================== HELPER FUNCTIONS ====================
-function calculateAge(birthday) {
-  let birthDate = new Date(birthday);
-  let today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  let m = today.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-  return age + " साल";
+// Render search results
+function renderSearchResults() {
+  if (!searchResults || searchResults.length === 0) {
+    contentArea.innerHTML = `
+      <div style="text-align: center; padding: 50px;">
+        <i class="fas fa-search" style="font-size: 50px; color: #ccc;"></i>
+        <p style="margin-top: 20px;">कोई रिजल्ट नहीं मिला</p>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '<div class="member-grid">';
+  
+  searchResults.forEach(p => {
+    let isHead = !p.familyHead || p.familyHead === "";
+    let age = p.birthday ? calculateAge(p.birthday) : "";
+    
+    html += `
+      <div class="member-card">
+        <div class="card-header">
+          <span class="relation-badge">
+            <i class="fas fa-${p.gender === 'पुरुष' ? 'mars' : p.gender === 'महिला' ? 'venus' : 'genderless'}"></i>
+            ${p.relation || 'रिश्ता'}
+          </span>
+          ${isHead ? '<span class="family-head-badge"><i class="fas fa-crown"></i> मुखिया</span>' : ''}
+        </div>
+        <div class="card-body">
+          <div class="avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="info">
+            <div class="info-item">
+              <i class="fas fa-user"></i>
+              <strong>${highlightText(p.name, lastSearchTerm)}</strong>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-phone"></i>
+              <a href="tel:${p.phone}">${p.phone || 'नंबर नहीं'}</a>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-home"></i>
+              <span>${p.village}</span>
+            </div>
+            ${p.familyHead ? `
+            <div class="info-item">
+              <i class="fas fa-crown"></i>
+              <span>मुखिया: ${getPersonName(p.familyHead)}</span>
+            </div>
+            ` : ''}
+            <div class="card-footer" style="padding: 10px 0 0 0; border: none;">
+              ${p.phone ? `
+              <a href="tel:${p.phone}" class="action-btn call-btn" style="padding: 5px 10px;">
+                <i class="fas fa-phone-alt"></i>
+              </a>
+              <a href="https://wa.me/${p.phone.replace(/\D/g,'')}" target="_blank" class="action-btn whatsapp-btn" style="padding: 5px 10px;">
+                <i class="fab fa-whatsapp"></i>
+              </a>
+              ` : ''}
+              <button class="action-btn edit-btn" onclick="editData('${p.id}')" style="padding: 5px 10px;">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete-btn" onclick="deleteData('${p.id}')" style="padding: 5px 10px;">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  contentArea.innerHTML = html;
 }
 
-function formatDate(date) {
-  let d = new Date(date);
-  return d.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short' });
+// Helper function to highlight text
+function highlightText(text, term) {
+  if (!term || !text) return text;
+  const regex = new RegExp(`(${term})`, 'gi');
+  return text.replace(regex, '<span style="background: #fef3c7; color: #92400e; padding: 2px 4px; border-radius: 4px;">$1</span>');
 }
 
-// ==================== SEARCH & FILTER ====================
+// ==================== CRUD OPERATIONS ====================
+function saveData() {
+  let name = nameEl.value.trim();
+  let village = villageEl.value.trim();
+
+  if (!name || !village) {
+    showAlert('❌ नाम और गांव जरूरी है', 'error');
+    return;
+  }
+
+  let person = {
+    id: Date.now() + Math.random(),
+    name: name,
+    village: village,
+    relation: relationEl.value,
+    phone: phoneEl.value,
+    map: mapEl.value,
+    birthday: birthdayEl.value,
+    gotra: gotraEl.value,
+    gender: genderEl.value,
+    familyHead: familyHeadEl.value || "",
+    notes: notesEl.value,
+    createdAt: new Date().toISOString()
+  };
+
+  if (editIndex === -1) {
+    people.push(person);
+    showAlert('✅ नया डेटा सेव हो गया!', 'success');
+  } else {
+    people[editIndex] = { ...person, id: people[editIndex].id };
+    editIndex = -1;
+    showAlert('✅ डेटा अपडेट हो गया!', 'success');
+  }
+
+  saveToStorage();
+  clearForm();
+  
+  if (searchResults) {
+    performSearch(lastSearchTerm);
+  } else {
+    updateUI();
+  }
+}
+
+function clearForm() {
+  nameEl.value = "";
+  villageEl.value = "";
+  relationEl.value = "";
+  phoneEl.value = "";
+  mapEl.value = "";
+  birthdayEl.value = "";
+  gotraEl.value = "";
+  genderEl.value = "";
+  familyHeadEl.value = "";
+  notesEl.value = "";
+  editIndex = -1;
+}
+
+function deleteData(id) {
+  if (confirm("क्या आप सच में डिलीट करना चाहते हैं?")) {
+    // Check if this person is a family head
+    const isFamilyHead = people.some(p => p.familyHead === id);
+    if (isFamilyHead) {
+      if (!confirm("⚠️ यह व्यक्ति किसी का परिवार मुखिया है। डिलीट करने पर उनका मुखिया हट जाएगा। क्या आपको यह डिलीट करना है?")) {
+        return;
+      }
+    }
+    
+    people = people.filter(p => p.id != id);
+    saveToStorage();
+    
+    if (currentView === 'family' && currentFamilyHeadId == id) {
+      showFamilyHeads();
+    } else if (searchResults) {
+      performSearch(lastSearchTerm);
+    } else {
+      updateUI();
+    }
+    showAlert('✅ डेटा डिलीट हो गया!', 'success');
+  }
+}
+
+function editData(id) {
+  let index = people.findIndex(p => p.id == id);
+  if (index === -1) return;
+
+  let p = people[index];
+  nameEl.value = p.name;
+  villageEl.value = p.village;
+  relationEl.value = p.relation || "";
+  phoneEl.value = p.phone || "";
+  mapEl.value = p.map || "";
+  birthdayEl.value = p.birthday || "";
+  gotraEl.value = p.gotra || "";
+  genderEl.value = p.gender || "";
+  familyHeadEl.value = p.familyHead || "";
+  notesEl.value = p.notes || "";
+
+  editIndex = index;
+  
+  // Scroll to form
+  document.querySelector(".form-section").scrollIntoView({ behavior: "smooth" });
+}
+
+function clearAllData() {
+  if (confirm("⚠️ क्या आप सच में सारा डेटा डिलीट करना चाहते हैं? यह क्रिया वापस नहीं की जा सकती!")) {
+    people = [];
+    saveToStorage();
+    showFamilyHeads();
+    showAlert('✅ सारा डेटा डिलीट हो गया!', 'success');
+  }
+}
+
+// ==================== SEARCH FUNCTIONS ====================
+let lastSearchTerm = '';
+
 function searchData() {
-  let term = search.value.toLowerCase();
-  let filtered = people.filter(p => 
+  let term = search.value.toLowerCase().trim();
+  lastSearchTerm = term;
+  
+  if (term === '') {
+    searchResults = null;
+    updateUI();
+    return;
+  }
+  
+  performSearch(term);
+}
+
+function performSearch(term) {
+  searchResults = people.filter(p => 
     p.name.toLowerCase().includes(term) ||
     p.village.toLowerCase().includes(term) ||
     (p.phone && p.phone.includes(term)) ||
     (p.relation && p.relation.toLowerCase().includes(term)) ||
     (p.gotra && p.gotra.toLowerCase().includes(term))
   );
-  showData(filtered);
+  
+  renderSearchResults();
 }
 
+// ==================== FILTER FUNCTIONS ====================
 function filterByVillage() {
   let village = filterVillage.value;
-  if (!village) {
-    showData();
-    return;
+  if (village) {
+    if (searchResults) {
+      searchResults = searchResults.filter(p => p.village === village);
+      renderSearchResults();
+    } else {
+      // TODO: Apply filter to current view
+    }
+  } else {
+    if (searchResults) {
+      performSearch(lastSearchTerm);
+    }
   }
-  let filtered = people.filter(p => p.village === village);
-  showData(filtered);
 }
 
 function filterByRelation() {
   let relation = filterRelation.value;
-  if (!relation) {
-    showData();
-    return;
+  if (relation) {
+    if (searchResults) {
+      searchResults = searchResults.filter(p => p.relation === relation);
+      renderSearchResults();
+    }
+  } else {
+    if (searchResults) {
+      performSearch(lastSearchTerm);
+    }
   }
-  let filtered = people.filter(p => p.relation === relation);
-  showData(filtered);
 }
 
 function updateFilters() {
@@ -1043,11 +1666,31 @@ function updateFilters() {
   });
 }
 
+// ==================== HELPER FUNCTIONS ====================
+function getPersonName(id) {
+  const person = people.find(p => p.id == id);
+  return person ? person.name : 'अज्ञात';
+}
+
+function calculateAge(birthday) {
+  let birthDate = new Date(birthday);
+  let today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  let m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+  return age + " साल";
+}
+
+function formatDate(date) {
+  let d = new Date(date);
+  return d.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short' });
+}
+
 // ==================== STATS ====================
 function updateStats() {
   document.getElementById("totalCount").textContent = people.length;
   
-  let families = new Set(people.map(p => p.village)).size;
+  let families = getFamilyHeads().length;
   document.getElementById("familyCount").textContent = families;
   
   let today = new Date();
@@ -1075,8 +1718,9 @@ function updateUpcomingBirthdays() {
   let html = "";
   upcoming.forEach(p => {
     let days = Math.ceil((p.nextBirthday - today) / (1000 * 60 * 60 * 24));
+    let head = people.find(h => h.id == p.familyHead);
     html += `
-    <div class="upcoming-item">
+    <div class="upcoming-item" onclick="showFamily('${head ? head.id : p.id}')">
       <div class="date">
         <i class="fas fa-calendar-alt"></i> ${formatDate(p.birthday)}
         ${days <= 7 ? '<span style="color: #f59e0b;"> (अगले ' + days + ' दिन)</span>' : ''}
@@ -1092,33 +1736,6 @@ function updateUpcomingBirthdays() {
   }
 
   document.getElementById("upcomingBirthdays").innerHTML = html;
-}
-
-function updateGotraStats() {
-  let gotras = {};
-  people.forEach(p => {
-    if (p.gotra) {
-      gotras[p.gotra] = (gotras[p.gotra] || 0) + 1;
-    }
-  });
-
-  let sortedGotras = Object.entries(gotras).sort((a, b) => b[1] - a[1]);
-  
-  let html = "";
-  sortedGotras.forEach(([gotra, count]) => {
-    html += `
-    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
-      <span><i class="fas fa-om"></i> ${gotra}</span>
-      <span class="badge">${count}</span>
-    </div>
-    `;
-  });
-
-  if (sortedGotras.length === 0) {
-    html = '<p style="color: #999; text-align: center;">कोई गोत्र डेटा नहीं</p>';
-  }
-
-  document.getElementById("gotraStats").innerHTML = html;
 }
 
 function initChart() {
@@ -1156,39 +1773,28 @@ function initChart() {
   });
 }
 
-// ==================== EXPORT/IMPORT FUNCTIONS (नया फीचर) ====================
+// ==================== EXPORT/IMPORT FUNCTIONS ====================
 
-// JSON फाइल में एक्सपोर्ट करें
 function exportToFile() {
   if (people.length === 0) {
     showAlert('कोई डेटा नहीं है!', 'error');
     return;
   }
 
-  // डेटा को JSON में बदलें
   const dataStr = JSON.stringify(people, null, 2);
-  
-  // ब्लॉब बनाएँ
   const blob = new Blob([dataStr], { type: 'application/json' });
-  
-  // डाउनलोड लिंक बनाएँ
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = `rishtedar_backup_${new Date().toISOString().slice(0,10)}.json`;
-  
-  // डाउनलोड करें
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
-  // URL रिलीज करें
   URL.revokeObjectURL(url);
   
   showAlert('✅ डेटा एक्सपोर्ट हो गया! फोन में सेव कर लें।', 'success');
 }
 
-// JSON फाइल से इंपोर्ट करें
 function importFromFile() {
   const fileInput = document.getElementById('importFile');
   const file = fileInput.files[0];
@@ -1204,25 +1810,20 @@ function importFromFile() {
     try {
       const importedData = JSON.parse(e.target.result);
       
-      // वैलिडेशन - चेक करें कि यह ऐरे है या नहीं
       if (!Array.isArray(importedData)) {
         throw new Error('फाइल फॉर्मेट सही नहीं है');
       }
       
-      // कन्फर्मेशन
       if (confirm(`क्या आप ${importedData.length} रिकॉर्ड इंपोर्ट करना चाहते हैं? मौजूदा डेटा मर्ज हो जाएगा।`)) {
         
-        // नए आईडी जेनरेट करें
         importedData.forEach(item => {
           if (!item.id) {
             item.id = Date.now() + Math.random();
           }
         });
         
-        // मौजूदा डेटा में मर्ज करें
         people = [...people, ...importedData];
         
-        // डुप्लिकेट हटाएँ (अगर कोई हो)
         const uniqueIds = new Set();
         people = people.filter(item => {
           if (uniqueIds.has(item.id)) {
@@ -1232,11 +1833,10 @@ function importFromFile() {
           return true;
         });
         
-        // सेव करें
         saveToStorage();
-        updateUI();
+        showFamilyHeads();
         
-        fileInput.value = ''; // फाइल इनपुट क्लियर करें
+        fileInput.value = '';
         showAlert(`✅ ${importedData.length} रिकॉर्ड इंपोर्ट हो गए!`, 'success');
       }
       
@@ -1249,7 +1849,6 @@ function importFromFile() {
   reader.readAsText(file);
 }
 
-// Excel एक्सपोर्ट
 function exportExcel() {
   if (people.length === 0) {
     showAlert('कोई डेटा नहीं है!', 'error');
@@ -1264,6 +1863,7 @@ function exportExcel() {
     'गोत्र': p.gotra,
     'जन्मदिन': p.birthday,
     'लिंग': p.gender,
+    'मुखिया': p.familyHead ? getPersonName(p.familyHead) : 'खुद मुखिया',
     'नोट्स': p.notes
   }));
 
@@ -1275,7 +1875,6 @@ function exportExcel() {
   showAlert('✅ Excel एक्सपोर्ट हो गया!', 'success');
 }
 
-// PDF एक्सपोर्ट
 function exportPDF() {
   if (people.length === 0) {
     showAlert('कोई डेटा नहीं है!', 'error');
@@ -1291,9 +1890,9 @@ function exportPDF() {
   
   let y = 20;
   people.forEach((p, i) => {
-    let line = `${i+1}. ${p.name} (${p.relation || 'रिश्ता'}) - ${p.village} - ${p.phone || 'नंबर नहीं'}`;
+    let familyHeadText = p.familyHead ? `(मुखिया: ${getPersonName(p.familyHead)})` : '(खुद मुखिया)';
+    let line = `${i+1}. ${p.name} ${familyHeadText} - ${p.relation || 'रिश्ता'} - ${p.village} - ${p.phone || 'नंबर नहीं'}`;
     
-    // लंबी लाइनों को तोड़ें
     if (doc.getTextWidth(line) > 180) {
       let words = line.split(' ');
       let currentLine = '';

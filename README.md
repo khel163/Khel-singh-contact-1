@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📱 रिश्तेदार मैनेजर (परिवार व्यू)</title>
+<title>📱 रिश्तेदार मैनेजर (फोटो के साथ)</title>
 
 <!-- Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -336,7 +336,7 @@ input:focus, select:focus, textarea:focus {
   background: #e0e0e0;
 }
 
-/* Family Head Card (मुख्य लिस्ट में) */
+/* Family Head Card */
 .family-head-card {
   background: white;
   border-radius: 15px;
@@ -390,7 +390,7 @@ input:focus, select:focus, textarea:focus {
   margin-right: 5px;
 }
 
-/* Member Card (परिवार के अंदर) */
+/* Member Card */
 .member-card {
   background: white;
   border-radius: 15px;
@@ -421,9 +421,10 @@ input:focus, select:focus, textarea:focus {
   gap: 12px;
 }
 
-.member-card .avatar {
-  width: 60px;
-  height: 60px;
+/* Avatar with Photo */
+.avatar {
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #667eea;
@@ -431,8 +432,33 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 30px;
   color: #667eea;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
 }
 
 /* Cards Grid */
@@ -481,6 +507,36 @@ input:focus, select:focus, textarea:focus {
   border: 2px solid #e0e0e0;
   border-radius: 10px;
   width: 250px;
+}
+
+/* Photo Modal */
+.photo-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.photo-modal img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
 }
 
 /* Sidebar */
@@ -672,7 +728,7 @@ input:focus, select:focus, textarea:focus {
     </div>
   </div>
 
-  <!-- Form Section -->
+  <!-- Form Section (फोटो ऑप्शन के साथ) -->
   <div class="form-section">
     <div class="form-grid">
       <div class="form-group">
@@ -764,6 +820,13 @@ input:focus, select:focus, textarea:focus {
     <div class="form-group" style="margin-bottom: 15px;">
       <i class="fas fa-sticky-note"></i>
       <textarea id="notes" placeholder="नोट्स / यादें ..." rows="2"></textarea>
+    </div>
+
+    <!-- फोटो अपलोड ऑप्शन (वापस जोड़ा) -->
+    <div class="form-group" style="margin-bottom: 15px;">
+      <i class="fas fa-camera"></i>
+      <input type="file" id="photo" accept="image/*" style="padding: 12px;">
+      <small style="display: block; margin-top: 5px; color: #666;">फोटो चुनें (JPG, PNG)</small>
     </div>
 
     <div class="btn-group">
@@ -896,6 +959,12 @@ input:focus, select:focus, textarea:focus {
   </div>
 </div>
 
+<!-- Photo Modal -->
+<div id="photoModal" class="photo-modal" onclick="closePhotoModal()">
+  <span class="close-modal">&times;</span>
+  <img id="modalImage" src="" alt="बड़ी फोटो">
+</div>
+
 <script>
 // ==================== GLOBAL VARIABLES ====================
 let people = [];
@@ -905,7 +974,7 @@ let currentFamilyHeadId = null;
 let searchResults = null;
 
 // DOM Elements
-let nameEl, villageEl, relationEl, phoneEl, mapEl, birthdayEl, gotraEl, genderEl, familyHeadEl, notesEl;
+let nameEl, villageEl, relationEl, phoneEl, mapEl, birthdayEl, gotraEl, genderEl, familyHeadEl, notesEl, photoEl;
 let contentArea, search, filterVillage, filterRelation;
 
 // Chart instance
@@ -927,6 +996,7 @@ document.addEventListener('DOMContentLoaded', function() {
   genderEl = document.getElementById("gender");
   familyHeadEl = document.getElementById("familyHead");
   notesEl = document.getElementById("notes");
+  photoEl = document.getElementById("photo");
   contentArea = document.getElementById("contentArea");
   search = document.getElementById("search");
   filterVillage = document.getElementById("filterVillage");
@@ -1098,6 +1168,23 @@ function showAlert(message, type = 'success') {
   }, 3000);
 }
 
+// ==================== PHOTO FUNCTIONS ====================
+function getBase64(file, callback) {
+  let reader = new FileReader();
+  reader.onload = () => callback(reader.result);
+  reader.readAsDataURL(file);
+}
+
+function showPhoto(photoUrl) {
+  if (!photoUrl) return;
+  document.getElementById('modalImage').src = photoUrl;
+  document.getElementById('photoModal').style.display = 'flex';
+}
+
+function closePhotoModal() {
+  document.getElementById('photoModal').style.display = 'none';
+}
+
 // ==================== RENDER VIEWS ====================
 function renderView() {
   if (searchResults) {
@@ -1142,8 +1229,11 @@ function renderFamilyHeads() {
           <span class="member-count">${members.length} सदस्य</span>
         </div>
         <div class="card-body">
-          <div class="avatar">
-            <i class="fas fa-user-circle"></i>
+          <div class="avatar" onclick="event.stopPropagation(); showPhoto('${head.photo || ''}')">
+            ${head.photo ? 
+              `<img src="${head.photo}" class="avatar-img" alt="${head.name}">` : 
+              `<div class="avatar-placeholder"><i class="fas fa-user-circle"></i></div>`
+            }
           </div>
           <div class="info">
             <div class="info-item">
@@ -1216,8 +1306,11 @@ function renderAllMembers() {
             ${isHead ? '<span class="family-head-badge"><i class="fas fa-crown"></i> मुखिया</span>' : ''}
           </div>
           <div class="card-body">
-            <div class="avatar">
-              <i class="fas fa-user-circle"></i>
+            <div class="avatar" onclick="showPhoto('${p.photo || ''}')">
+              ${p.photo ? 
+                `<img src="${p.photo}" class="avatar-img" alt="${p.name}">` : 
+                `<div class="avatar-placeholder"><i class="fas fa-user-circle"></i></div>`
+              }
             </div>
             <div class="info">
               <div class="info-item">
@@ -1298,8 +1391,11 @@ function renderFamily() {
             </span>
           </div>
           <div class="card-body">
-            <div class="avatar">
-              <i class="fas fa-user-circle"></i>
+            <div class="avatar" onclick="showPhoto('${head.photo || ''}')">
+              ${head.photo ? 
+                `<img src="${head.photo}" class="avatar-img" alt="${head.name}">` : 
+                `<div class="avatar-placeholder"><i class="fas fa-user-circle"></i></div>`
+              }
             </div>
             <div class="info">
               <div class="info-item">
@@ -1351,8 +1447,11 @@ function renderFamily() {
           </span>
         </div>
         <div class="card-body">
-          <div class="avatar">
-            <i class="fas fa-user-circle"></i>
+          <div class="avatar" onclick="showPhoto('${p.photo || ''}')">
+            ${p.photo ? 
+              `<img src="${p.photo}" class="avatar-img" alt="${p.name}">` : 
+              `<div class="avatar-placeholder"><i class="fas fa-user-circle"></i></div>`
+            }
           </div>
           <div class="info">
             <div class="info-item">
@@ -1423,8 +1522,11 @@ function renderSearchResults() {
           ${isHead ? '<span class="family-head-badge"><i class="fas fa-crown"></i> मुखिया</span>' : ''}
         </div>
         <div class="card-body">
-          <div class="avatar">
-            <i class="fas fa-user-circle"></i>
+          <div class="avatar" onclick="showPhoto('${p.photo || ''}')">
+            ${p.photo ? 
+              `<img src="${p.photo}" class="avatar-img" alt="${p.name}">` : 
+              `<div class="avatar-placeholder"><i class="fas fa-user-circle"></i></div>`
+            }
           </div>
           <div class="info">
             <div class="info-item">
@@ -1488,10 +1590,25 @@ function saveData() {
     return;
   }
 
+  let file = photoEl.files[0];
+
+  if (file) {
+    getBase64(file, (base64) => processSave(base64));
+  } else {
+    // If editing, keep old photo
+    let oldPhoto = "";
+    if (editIndex !== -1 && people[editIndex]) {
+      oldPhoto = people[editIndex].photo || "";
+    }
+    processSave(oldPhoto);
+  }
+}
+
+function processSave(photo) {
   let person = {
     id: Date.now() + Math.random(),
-    name: name,
-    village: village,
+    name: nameEl.value,
+    village: villageEl.value,
     relation: relationEl.value,
     phone: phoneEl.value,
     map: mapEl.value,
@@ -1500,6 +1617,7 @@ function saveData() {
     gender: genderEl.value,
     familyHead: familyHeadEl.value || "",
     notes: notesEl.value,
+    photo: photo,
     createdAt: new Date().toISOString()
   };
 
@@ -1533,6 +1651,7 @@ function clearForm() {
   genderEl.value = "";
   familyHeadEl.value = "";
   notesEl.value = "";
+  photoEl.value = "";
   editIndex = -1;
 }
 
@@ -1626,8 +1745,6 @@ function filterByVillage() {
     if (searchResults) {
       searchResults = searchResults.filter(p => p.village === village);
       renderSearchResults();
-    } else {
-      // TODO: Apply filter to current view
     }
   } else {
     if (searchResults) {
